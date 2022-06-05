@@ -1,5 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
+dotenv.config();
 
 let users = [];
 
@@ -38,11 +41,14 @@ export const getUsers = (req, res) => {
 
 export const loginUser = (req, res) => {
     const { email, password } = req.body;
-    let foundUser = users.find(user => user.email == email);
-    if (foundUser) {
-        if (foundUser.password == password) {
+    let user = users.find(person => person.email == email);
+    if (user) {
+        if (user.password == password) {
 
-            res.send(`User login for ${email} is successful..`)
+            const token = jwt.sign({ id: user.id, email: user.email },
+                process.env.JWT_KEY
+            );
+            res.status(200).json({ user, token });
         } else {
             res.send(`Wrong password for ${email}`);
         }
@@ -54,9 +60,18 @@ export const loginUser = (req, res) => {
 
 
 export const createUser = (req, res) => {
-    const user = req.body;
-    // const userId=uuidv4();
-    users.push({ ...user, id: uuidv4() });
-    res.send(`The user with email ${user.email} has been addedd succesfully`);
+    let user = req.body;
+    user = { ...user, id: uuidv4() };
+    users.push(user);
+    // console.log(user)
+
+    const token = jwt.sign({ id: user.id, email: user.email },
+        process.env.JWT_KEY
+    );
+    // save user token
+    // user.token = token;
+
+    // return new user
+    res.status(201).json({ user, token });
 
 };
