@@ -1,24 +1,16 @@
 import express from "express";
 
+
+import { createUser, getUsers, getUser, updateUser, deleteUser } from "../controllers/user.js";
+
 const router = express.Router();
 
-const users = [
-    {
-        email: "hello@gmail.com",
-        password: "123"
-    }
-]
 
-router.get("/", (req, res) => {
-    res.json(users);
 
-})
-
-router.post("/", (req, res) => {
-    const user = req.body;
-    users.push(user);
-    res.send(`The user with email ${user.email} has been addedd succesfully`);
-
-})
+router.get("/", getUsers);
+router.get("/:id", getUser);
+router.post("/", createUser);
+router.patch("/:id", updateUser);
+router.delete("/:id", deleteUser);
 
 export default router;
