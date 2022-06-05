@@ -36,6 +36,23 @@ export const getUsers = (req, res) => {
 };
 
 
+export const loginUser = (req, res) => {
+    const { email, password } = req.body;
+    let foundUser = users.find(user => user.email == email);
+    if (foundUser) {
+        if (foundUser.password == password) {
+
+            res.send(`User login for ${email} is successful..`)
+        } else {
+            res.send(`Wrong password for ${email}`);
+        }
+    } else {
+        res.send(`User with the email ${email} does not exist`)
+    }
+
+}
+
+
 export const createUser = (req, res) => {
     const user = req.body;
     // const userId=uuidv4();
