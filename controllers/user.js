@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { User } from "../models/user.js"
 
 dotenv.config();
 
@@ -39,9 +40,13 @@ export const getUsers = (req, res) => {
 };
 
 
-export const loginUser = (req, res) => {
+export const loginUser = async (req, res) => {
     const { email, password } = req.body;
-    let user = users.find(person => person.email == email);
+    if (!(email && password)) {
+        res.status(400).json({ "status": false, "message": "All input is required" });
+    }
+    // let user = users.find(person => person.email == email);
+    const user = await User.findOne({ email });
     if (user) {
         if (user.password == password) {
 
@@ -59,19 +64,42 @@ export const loginUser = (req, res) => {
 }
 
 
-export const createUser = (req, res) => {
-    let user = req.body;
+export const createUser = async (req, res) => {
+    /* let user = req.body;
     user = { ...user, id: uuidv4() };
-    users.push(user);
+    users.push(user); */
     // console.log(user)
+    try {
+        const { email, password } = req.body;
+        if (!(email && password)) {
+            res.status(400).json({ "status": false, "message": "All input is required" });
+        }
 
-    const token = jwt.sign({ id: user.id, email: user.email },
-        process.env.JWT_KEY
-    );
-    // save user token
-    // user.token = token;
+        const oldUser = await User.findOne({ email });
 
-    // return new user
-    res.status(201).json({ user, token });
+        if (oldUser) {
+            return res.status(409).json({ "success": false, "message": "User Already Exist. Please Login" });
+        }
+
+
+        const user = await User.create({
+
+            email: email.toLowerCase(), // sanitize: convert email to lowercase
+            password
+        });
+
+        const token = jwt.sign({ id: user.id, email: user.email },
+            process.env.JWT_KEY
+        );
+
+
+        // return new user
+        res.status(201).json({ "success": true, user, token });
+    }
+
+    catch (err) {
+        res.status(403).json({ "success": false, "message": err.message })
+    }
+
 
 };

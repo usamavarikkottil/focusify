@@ -1,7 +1,9 @@
 import express from "express";
 import userRoutes from "./routes/user.js"
+import { connect as dbconnect } from "./config/database.js";
 
 
+dbconnect();
 const app = express();
 const PORT = 5000;
 
