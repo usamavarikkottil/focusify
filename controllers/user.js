@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { User } from "../models/user.js"
+import { User } from "../models/user.js";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 
@@ -85,28 +86,24 @@ export const loginUser = async (req, res) => {
         }
 
 
-        //Check if the email has registered.
+        //Check if the email has an account.
         const user = await User.findOne({ email });
-        if (user) {
-            if (user.password == password) {
 
-                // creates a new jwt token for the loggedin user
-                const token = jwt.sign({ id: user.id, email: user.email },
-                    process.env.JWT_KEY
-                );
+        // Responds the token and user details only if the user has an account and the credentials are valid.
+        if (user && (await bcrypt.compare(password, user.password))) {
 
-                // return the loggedin user with a jwt token
-                res.status(200).json({ "success": true, user, token });
+            // creates a new jwt token for the loggedin user
+            const token = jwt.sign({ id: user.id, email: user.email },
+                process.env.JWT_KEY
+            );
 
-            } else {
+            // return the loggedin user with a jwt token
+            res.status(200).json({ "success": true, user, token });
 
-                // Incorrect password response
-                res.status(401).json({ "success:": false, "message": `Wrong password for ${email}` });
-            }
         } else {
 
-            // User not found response
-            res.status(404).json({ "success": false, "message": `User with the email ${email} does not exist` });
+            // Invalid credentials response
+            res.status(401).json({ "success:": false, "message": "Invalid email and/or password" });
         }
     } catch (error) {
         res.status(500).json({ "success": false, "message": error.message })
@@ -132,11 +129,13 @@ export const createUser = async (req, res) => {
             return res.status(409).json({ "success": false, "message": `User with the email ${email} Already Exist. Please Login.` });
         }
 
+        // encrypt the password of the new user
+        let encryptedPassword = await bcrypt.hash(password, 10);
 
         // creates a new user with the email and password
         const user = await User.create({
             email: email.toLowerCase(), // sanitize: convert email to lowercase
-            password
+            password: encryptedPassword
         });
 
 
