@@ -119,7 +119,7 @@ export const createUser = async (req, res) => {
 
         //check if the necessary inputs have provided by the user.
         if (!(email && password)) {
-            res.status(400).json({ "status": false, "message": "All input is required" });
+            res.status(400).json({ "status": false, "message": "All inputs are required" });
         }
 
 
@@ -149,7 +149,7 @@ export const createUser = async (req, res) => {
     }
 
     catch (err) {
-        res.status(403).json({ "success": false, "message": err.message })
+        res.status(403).json({ "success": false, "message": err })
     }
 
 
