@@ -13,7 +13,7 @@ export const createSession = async (req, res) => {
 
         //check if the necessary inputs have provided by the user.
         if (!(startTime && endTime)) {
-            res.status(400).json({ "status": false, "message": "All inputs are required" });
+            return res.status(400).json({ "status": false, "message": "All inputs are required" });
         }
 
 
@@ -35,8 +35,8 @@ export const createSession = async (req, res) => {
     }
 
     catch (err) {
-        // res.status(403).json({ "success": false, "message": err.message })
-        console.error(err);
+        res.status(403).json({ "success": false, "message": err.message })
+        // console.error(err);
     }
 
 
@@ -49,11 +49,19 @@ export const deleteSession = async (req, res) => {
         const { id } = req.params;
 
         const session = await Session.findByIdAndDelete(id).exec();
-        // console.log(session)
+
+        // Error message returns if the session doesn't exist
+        if (!session) {
+            return res.status(404).json({ "success": false, "message": `the session ${id} not found` });
+        }
+
+
+        // Outputs the if the session was there.
         res.json({ "success": true, "message": `${session} has been deleted` });
 
     } catch (error) {
         res.status(401).json({ "success": false, "message": error.message });
+        // console.log("fha")
     }
 
 
@@ -66,6 +74,12 @@ export const getSession = async (req, res) => {
         const { id } = req.params;
 
         const session = await Session.findById(id).exec();
+
+        // Error message returns if the session doesn't exist
+        if (!session) {
+            return res.status(404).json({ "success": false, "message": `the session ${id} not found` });
+        }
+
         res.json({ "success": true, session });
 
     } catch (error) {

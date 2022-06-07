@@ -13,6 +13,13 @@ export const deleteUser = async (req, res) => {
         const { id } = req.user;
 
         const user = await User.findByIdAndDelete(id).exec();
+
+        // Error message returns if the user doesn't exist
+        if (!user) {
+            return res.status(404).json({ "success": false, "message": `the user ${id} is not found` });
+        }
+
+        //success message 
         res.json({ "success": true, "message": `${user} account has been deleted` });
 
     } catch (error) {
@@ -53,17 +60,17 @@ export const getUser = async (req, res) => {
         const { id } = req.params;
 
         const user = await User.findById(id).exec();
-        /*    const user = await User
-               .findByIdAndUpdate(id, { sessions: ["629df65daec8a6b29cfb219c"] }, { new: true })
-               .exec();
-    */
 
+        // Error message returns if the user doesn't exist
+        if (!user) {
+            return res.status(404).json({ "success": false, "message": `the user ${id} is not found` });
+        }
 
-        // 629df65daec8a6b29cfb219c
+        // Success message
         res.json({ "success": true, user });
 
     } catch (error) {
-        res.status(500).json({ "success": false, "message": error.message })
+        res.status(400).json({ "success": false, "message": error.message })
     }
 
 };
@@ -91,7 +98,7 @@ export const loginUser = async (req, res) => {
 
         //check if the necessary inputs have provided by the user.
         if (!(email && password)) {
-            res.status(400).json({ "status": false, "message": "All input is required" });
+            return res.status(400).json({ "status": false, "message": "All input is required" });
         }
 
 
@@ -128,7 +135,7 @@ export const createUser = async (req, res) => {
 
         //check if the necessary inputs have provided by the user.
         if (!(email && password)) {
-            res.status(400).json({ "status": false, "message": "All inputs are required" });
+            return res.status(400).json({ "status": false, "message": "All inputs are required" });
         }
 
 
