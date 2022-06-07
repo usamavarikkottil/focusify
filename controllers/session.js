@@ -5,12 +5,13 @@ import { Session } from "../models/session.js";
 
 export const createSession = async (req, res) => {
     try {
+
+        const { id } = req.user;
         // accepts user queries
         const { startTime, endTime } = req.body;
 
+
         //check if the necessary inputs have provided by the user.
-
-
         if (!(startTime && endTime)) {
             res.status(400).json({ "status": false, "message": "All inputs are required" });
         }
@@ -19,11 +20,18 @@ export const createSession = async (req, res) => {
         // creates a new session
         const session = await Session.create({
             startTime,
-            endTime
+            endTime,
+            users: id
         });
 
+        // Push the new session into the user's session schema
+        const user = await User
+            .findByIdAndUpdate(id, { $push: { sessions: session } }, { new: true })
+            .populate("sessions")
+            .exec();
+
         // return the new session details
-        res.status(201).json({ "success": true, session });
+        res.status(201).json({ "success": true, user });
     }
 
     catch (err) {

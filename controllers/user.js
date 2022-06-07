@@ -53,6 +53,13 @@ export const getUser = async (req, res) => {
         const { id } = req.params;
 
         const user = await User.findById(id).exec();
+        /*    const user = await User
+               .findByIdAndUpdate(id, { sessions: ["629df65daec8a6b29cfb219c"] }, { new: true })
+               .exec();
+    */
+
+
+        // 629df65daec8a6b29cfb219c
         res.json({ "success": true, user });
 
     } catch (error) {
@@ -64,7 +71,9 @@ export const getUser = async (req, res) => {
 export const getUsers = async (req, res) => {
     // list all users
     try {
-        const users = await User.find({});
+
+
+        const users = await User.find({}).populate("sessions");
         res.json({ "success": true, users });
 
     } catch (error) {
